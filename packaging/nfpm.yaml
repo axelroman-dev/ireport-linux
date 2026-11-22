@@ -17,15 +17,15 @@ homepage: https://github.com/axelroman-dev/ireport-linux
 license: AGPL-3.0-only AND MIT AND GPL-2.0-only WITH Classpath-exception-2.0
 
 contents:
-  - src: @STAGE@/app
+  - src: "@STAGE@/app"
     dst: /opt/ireport-5.6.0
     type: tree
   - src: /opt/ireport-5.6.0/ireport-x11.sh
     dst: /usr/bin/ireport
     type: symlink
-  - src: @STAGE@/ireport.desktop
+  - src: "@STAGE@/ireport.desktop"
     dst: /usr/share/applications/ireport.desktop
-  - src: @STAGE@/ireport.png
+  - src: "@STAGE@/ireport.png"
     dst: /usr/share/icons/hicolor/48x48/apps/ireport.png
 
 overrides:
