@@ -41,15 +41,17 @@ LOG="$USERDIR/var/log/xpra.log"
 mkdir -p "$(dirname "$LOG")"
 [ -z "$IREPORT_DEBUG" ] && exec >"$LOG" 2>&1
 
-# --splash solo existe desde Xpra 4 (Debian 12 y Ubuntu 24.04 traen la 3.1)
+# Opciones que solo existen desde Xpra 4 (Debian 12 y Ubuntu 24.04 traen la 3.1).
+# --headerbar=no: sin la barra GTK de Xpra (icono, menú ☰); la barra la dibuja el escritorio.
 XPRA_EXTRA=()
 XPRA_MAJOR="$(xpra --version 2>/dev/null | sed -n 's/^xpra v\([0-9]*\).*/\1/p' | head -1)"
-[ "${XPRA_MAJOR:-0}" -ge 4 ] && XPRA_EXTRA+=(--splash=no)
+[ "${XPRA_MAJOR:-0}" -ge 4 ] && XPRA_EXTRA+=(--splash=no --headerbar=no)
 
 exec xpra start ":$D" \
     --start-child="$(printf '%q ' "$APPDIR/ireport-x11.sh" --child "$@")" \
     --xvfb="Xvfb +extension Composite +extension RANDR +extension RENDER -screen 0 5120x2880x24+32 -nolisten tcp -noreset -dpi 96" \
     --exit-with-children=yes \
+    --title=@title@ \
     --ssh-upgrade=no \
     --attach=yes \
     --daemon=no \
