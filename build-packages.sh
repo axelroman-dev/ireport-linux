@@ -13,8 +13,8 @@ NFPM_SHA256="6d7f9a28b2f397934403950fcbba83f598b08d02edbe79a0815b3b4897341750"
 NFPM="$BUILD/nfpm-$NFPM_VERSION/nfpm"
 . "$REPO/packaging/stage.sh"
 
-export STAGE="$BUILD/pkgroot"
-export RELEASE="${RELEASE:-1}"
+STAGE="$BUILD/pkgroot"
+RELEASE="${RELEASE:-1}"
 FORMATS=("$@")
 [ ${#FORMATS[@]} -eq 0 ] && FORMATS=(deb rpm archlinux)
 
@@ -33,7 +33,8 @@ write_desktop "$STAGE/ireport.desktop" ireport
 make_icon "$STAGE/ireport.png"
 
 mkdir -p "$DIST"
+sed -e "s|@STAGE@|$STAGE|g" -e "s|@RELEASE@|$RELEASE|g" "$REPO/packaging/nfpm.yaml" > "$BUILD/nfpm.yaml"
 for f in "${FORMATS[@]}"; do
-    "$NFPM" package --config "$REPO/packaging/nfpm.yaml" --packager "$f" --target "$DIST/"
+    "$NFPM" package --config "$BUILD/nfpm.yaml" --packager "$f" --target "$DIST/"
 done
 ls -lh "$DIST"
