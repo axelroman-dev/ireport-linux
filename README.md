@@ -1,6 +1,8 @@
-# iReport 5.6.0 en CachyOS / Arch (Wayland)
+# iReport 5.6.0 en Fedora (Wayland)
 
 iReport 5.6.0 (Jaspersoft, 2014) adaptado para correr en un Linux moderno con sesión **Wayland** (KDE Plasma), sin instalar Java viejo en el sistema ni cambiar a una sesión X11.
+
+Versión para **Fedora** (probada en Fedora 45 KDE Plasma, Wayland, SELinux en modo *enforcing*) derivada de [ireport-5.6.0-cachyos](https://github.com/axelroman-dev/ireport-5.6.0-cachyos). Lo único que cambia respecto a la versión de CachyOS son los paquetes del sistema (`dnf` en lugar de `pacman`).
 
 > **Proyecto no oficial.** No está afiliado ni respaldado por Jaspersoft / TIBCO / Cloud Software Group. "iReport" y "JasperReports" son marcas de sus respectivos dueños. iReport está descontinuado; su sucesor oficial es Jaspersoft Studio.
 
@@ -9,20 +11,20 @@ iReport 5.6.0 (Jaspersoft, 2014) adaptado para correr en un Linux moderno con se
 ## Uso rápido
 
 ```bash
-sudo pacman -S xpra xorg-server-xvfb xorg-xauth
+sudo dnf install xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo
 ./setup.sh          # descarga el JDK 7 embebido en ./jre (una sola vez)
 ./ireport-x11.sh    # abre iReport
 ```
 
 ## AppImage
 
-Un solo archivo con iReport + JDK 7 + lanzador. El sistema solo necesita `xpra xorg-server-xvfb xorg-xauth`.
+Un solo archivo con iReport + JDK 7 + lanzador. El sistema solo necesita `xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo`.
 
-Descarga directa: [iReport-5.6.0-x86_64.AppImage](https://github.com/axelroman-dev/ireport-5.6.0-cachyos/releases/latest/download/iReport-5.6.0-x86_64.AppImage) ([todas las versiones](https://github.com/axelroman-dev/ireport-5.6.0-cachyos/releases))
+Descarga directa: [iReport-5.6.0-x86_64.AppImage](https://github.com/axelroman-dev/ireport-fedora/releases/latest/download/iReport-5.6.0-x86_64.AppImage) ([todas las versiones](https://github.com/axelroman-dev/ireport-fedora/releases))
 
 ```bash
-curl -LO https://github.com/axelroman-dev/ireport-5.6.0-cachyos/releases/latest/download/iReport-5.6.0-x86_64.AppImage
-curl -LO https://github.com/axelroman-dev/ireport-5.6.0-cachyos/releases/latest/download/iReport-5.6.0-x86_64.AppImage.sha256
+curl -LO https://github.com/axelroman-dev/ireport-fedora/releases/latest/download/iReport-5.6.0-x86_64.AppImage
+curl -LO https://github.com/axelroman-dev/ireport-fedora/releases/latest/download/iReport-5.6.0-x86_64.AppImage.sha256
 sha256sum -c iReport-5.6.0-x86_64.AppImage.sha256
 chmod +x iReport-5.6.0-x86_64.AppImage
 ./iReport-5.6.0-x86_64.AppImage
@@ -72,6 +74,8 @@ Se probó y descartó **Xephyr + Openbox** (X11 anidado en una ventana): funcion
 - Si los paneles quedan desordenados: *Window → Reset Windows*.
 - Los avisos de `xkbcomp`, `dbus`, `pulseaudio`, `vp9` y `fgrep` en el log son normales.
 - Portapapeles entre iReport y otras apps: lo sincroniza Xpra.
+- Equivalencia de paquetes Arch → Fedora: `xorg-server-xvfb` → `xorg-x11-server-Xvfb`, `xorg-xauth` → `xorg-x11-xauth`; `xdpyinfo` (para centrar la ventana) va aparte en Fedora.
+- El AppImage necesita FUSE; en Fedora ya viene `fuse-libs`. Si no, ejecútalo con `./iReport-5.6.0-x86_64.AppImage --appimage-extract-and-run`.
 
 ## Pendiente
 
@@ -79,7 +83,7 @@ Se probó y descartó **Xephyr + Openbox** (X11 anidado en una ventana): funcion
 
 ## Créditos
 
-- **Axel Román** ([@axelroman-dev](https://github.com/axelroman-dev)): idea, requisitos y pruebas en CachyOS/KDE Wayland.
+- **Axel Román** ([@axelroman-dev](https://github.com/axelroman-dev)): idea, requisitos y pruebas en CachyOS/KDE Wayland y Fedora 45 KDE Wayland.
 - **Claude** (Anthropic, vía Claude Code): diagnóstico, scripts (`setup.sh`, `ireport-x11.sh`, `build-appimage.sh`), empaquetado AppImage y documentación.
 
 ## Licencias
@@ -87,7 +91,7 @@ Se probó y descartó **Xephyr + Openbox** (X11 anidado en una ventana): funcion
 | Componente | Licencia | Código fuente |
 |---|---|---|
 | Scripts y documentación de este repo (`README.md`, `setup.sh`, `ireport-x11.sh`, `build-appimage.sh`) | MIT — ver `LICENSE-scripts` | este repo |
-| iReport 5.6.0 (sin modificar salvo `etc/ireport.conf` y la desactivación del módulo heartbeat) | AGPLv3 — `LICENSE_ireport.txt`, `notice.txt` | `iReport-5.6.0-src.zip` adjunto en cada [Release](https://github.com/axelroman-dev/ireport-5.6.0-cachyos/releases); original en [SourceForge](https://sourceforge.net/projects/ireport/files/iReport/iReport-5.6.0/) |
+| iReport 5.6.0 (sin modificar salvo `etc/ireport.conf` y la desactivación del módulo heartbeat) | AGPLv3 — `LICENSE_ireport.txt`, `notice.txt` | `iReport-5.6.0-src.zip` adjunto en cada [Release](https://github.com/axelroman-dev/ireport-fedora/releases); original en [SourceForge](https://sourceforge.net/projects/ireport/files/iReport/iReport-5.6.0/) |
 | Bibliotecas incluidas en iReport (NetBeans, JasperReports, etc.) | Varias — `Third-Party-Notices.pdf`, `license-text-files/` | incluidas en el zip de fuentes / proyectos originales |
 | MySQL Connector/J (`libs/`) | GPLv2 con Universal FOSS Exception | [mysql/mysql-connector-j](https://github.com/mysql/mysql-connector-j) (tags `5.1.49`, `8.0.33`, `8.3.0`) |
 | Azul Zulu JDK 7u352 (no está en el repo; va dentro del AppImage) | GPLv2 con Classpath Exception — `jre/LICENSE`, `jre/THIRD_PARTY_README` | `jre/src.zip` (biblioteca de clases) y oferta escrita de Azul en `jre/readme.txt` (azul_openjdk@azul.com); basado en [OpenJDK 7u](https://github.com/openjdk/jdk7u) |

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Ejecuta iReport en su propio servidor X11 aislado mediante Xpra (modo seamless):
 # cada ventana de iReport aparece como una ventana normal del escritorio Wayland.
-# Requiere: xpra xorg-server-xvfb xorg-xauth
+# Requiere (Fedora): xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo
 # IREPORT_DEBUG=1 muestra el log de Xpra en la terminal.
 
 APPDIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
@@ -17,7 +17,7 @@ WIN_W=1920
 WIN_H=1080
 
 for cmd in xpra Xvfb xauth; do
-    command -v "$cmd" >/dev/null || { echo "Falta '$cmd': sudo pacman -S xpra xorg-server-xvfb xorg-xauth" >&2; exit 1; }
+    command -v "$cmd" >/dev/null || { echo "Falta '$cmd': sudo dnf install xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo" >&2; exit 1; }
 done
 
 # Tamaño inicial de la ventana principal: 1920x1080 centrada

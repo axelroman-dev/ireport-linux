@@ -1,6 +1,6 @@
 #!/bin/bash
 # Construye dist/iReport-5.6.0-x86_64.AppImage con iReport, el JDK 7 embebido y el lanzador Xpra.
-# En el sistema donde se ejecute el AppImage hacen falta: xpra xorg-server-xvfb xorg-xauth
+# En el sistema donde se ejecute el AppImage hacen falta (Fedora): xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
