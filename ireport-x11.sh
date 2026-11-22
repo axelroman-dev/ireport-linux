@@ -1,20 +1,23 @@
 #!/bin/bash
 # Ejecuta iReport en su propio servidor X11 aislado mediante Xpra (modo seamless):
 # cada ventana de iReport aparece como una ventana normal del escritorio Wayland.
-# Requiere: xpra, Xvfb, xauth (y xdpyinfo para centrar la ventana); ver lib/distro.sh
+# Requiere: xpra, Xvfb, xauth (y xdpyinfo + xrandr para ajustar la ventana); ver lib/distro.sh
 # IREPORT_DEBUG=1 muestra el log de Xpra en la terminal.
+# WIN_W / WIN_H: tamaño máximo de la ventana principal (por defecto 1920x1080).
+# IREPORT_MONITOR: monitor donde abrir (nombre de "xrandr --listactivemonitors"; por defecto el principal).
 
 APPDIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+USERDIR="$HOME/.ireport/5.6.0"
+export WIN_W="${WIN_W:-1920}" WIN_H="${WIN_H:-1080}"
 
-# Proceso hijo dentro de Xpra: arrancar iReport desde el home del usuario
+# Proceso hijo dentro de Xpra: ajustar la ventana al monitor y arrancar iReport desde el home
 if [ "$1" = "--child" ]; then
     shift
+    . "$APPDIR/lib/window.sh"
+    fit_main_window "$USERDIR/config/Windows2Local/WindowManager.wswmgr"
     cd "$HOME" || exit 1
     exec "$APPDIR/bin/ireport" --jdkhome "$APPDIR/jre" "$@"
 fi
-USERDIR="$HOME/.ireport/5.6.0"
-WIN_W=1920
-WIN_H=1080
 
 . "$APPDIR/lib/distro.sh"
 for cmd in xpra Xvfb xauth; do
@@ -27,21 +30,8 @@ for cmd in xpra Xvfb xauth; do
     fi
 done
 
-# Tamaño inicial de la ventana principal: 1920x1080 centrada
-WSMGR="$USERDIR/config/Windows2Local/WindowManager.wswmgr"
-if [ -f "$WSMGR" ]; then
-    read -r SW SH < <(xdpyinfo 2>/dev/null | awk '/dimensions:/ { split($2, d, "x"); print d[1], d[2] }')
-    X=$(( (${SW:-$WIN_W} - WIN_W) / 2 )); [ $X -lt 0 ] && X=0
-    Y=$(( (${SH:-$WIN_H} - WIN_H) / 2 )); [ $Y -lt 0 ] && Y=0
-    # Solo el primer bloque (joined-properties de main-window)
-    sed -i "0,/^\/>/{
-        s/^   x=\"[0-9-]*\"/   x=\"$X\"/
-        s/^   y=\"[0-9-]*\"/   y=\"$Y\"/
-        s/^   width=\"[0-9]*\"/   width=\"$WIN_W\"/
-        s/^   height=\"[0-9]*\"/   height=\"$WIN_H\"/
-        s/^   frame-state=\"[0-9]*\"/   frame-state=\"0\"/
-    }" "$WSMGR"
-fi
+# Display del escritorio (XWayland): el hijo lo usa para leer los monitores con xrandr
+export IREPORT_HOST_DISPLAY="${DISPLAY:-}"
 
 # Buscar un número de display libre
 D=10

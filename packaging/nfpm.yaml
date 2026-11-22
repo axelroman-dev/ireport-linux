@@ -31,12 +31,12 @@ contents:
 overrides:
   deb:
     depends: [xpra, xvfb, xauth]
-    recommends: [x11-utils]
+    recommends: [x11-utils, x11-xserver-utils]
   rpm:
     depends: [xpra, xorg-x11-server-Xvfb, xorg-x11-xauth]
-    recommends: [xdpyinfo]
+    recommends: [xdpyinfo, xrandr]
   archlinux:
-    depends: [xpra, xorg-server-xvfb, xorg-xauth, xorg-xdpyinfo]
+    depends: [xpra, xorg-server-xvfb, xorg-xauth, xorg-xdpyinfo, xorg-xrandr]
 
 rpm:
   group: Development/Tools

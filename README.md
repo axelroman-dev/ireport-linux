@@ -31,10 +31,10 @@ Dependencias según la distro (lo mismo que imprime `setup.sh`, definido en `lib
 
 | Familia | Comando |
 |---|---|
-| Arch / CachyOS | `sudo pacman -S --needed xpra xorg-server-xvfb xorg-xauth xorg-xdpyinfo` |
-| Fedora | `sudo dnf install xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo` |
-| Debian / Ubuntu | `sudo apt install xpra xvfb xauth x11-utils` |
-| openSUSE | `sudo zypper install xpra xorg-x11-server-Xvfb xauth xdpyinfo` |
+| Arch / CachyOS | `sudo pacman -S --needed xpra xorg-server-xvfb xorg-xauth xorg-xdpyinfo xorg-xrandr` |
+| Fedora | `sudo dnf install xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo xrandr` |
+| Debian / Ubuntu | `sudo apt install xpra xvfb xauth x11-utils x11-xserver-utils` |
+| openSUSE | `sudo zypper install xpra xorg-x11-server-Xvfb xauth xdpyinfo xrandr` |
 
 ## AppImage
 
@@ -88,7 +88,7 @@ Se probó y descartó **Xephyr + Openbox** (X11 anidado en una ventana): funcion
 - `packaging/stage.sh` — funciones comunes a ambos: copia los archivos versionados + `jre/`, genera el `.desktop` y el icono (extraído de `core_ireport.jar`).
 - `ireport-x11.sh` — lanzador:
   - busca un display libre y arranca `xpra` con `Xvfb` (5120x2880 virtual) y iReport como proceso hijo; todo se cierra al cerrar iReport;
-  - abre la ventana principal en **1920x1080 centrada** (ajusta `~/.ireport/5.6.0/config/Windows2Local/WindowManager.wswmgr`); se cambia con `WIN_W`/`WIN_H` en el script;
+  - abre la ventana principal **centrada en el monitor principal**, de 1920x1080 como máximo y nunca más del 90% del monitor (`lib/window.sh`, ajusta `~/.ireport/5.6.0/config/Windows2Local/WindowManager.wswmgr`). Funciona con varios monitores y escala fraccional. Otro monitor: `IREPORT_MONITOR=HDMI-A-1 ./ireport-x11.sh` (nombres en `xrandr --listactivemonitors`); otro tamaño máximo: `WIN_W=2560 WIN_H=1440`;
   - arranca iReport desde `$HOME` y con `--jdkhome` absoluto a `jre/`;
   - el log de Xpra va a `~/.ireport/5.6.0/var/log/xpra.log`; para verlo en la terminal: `IREPORT_DEBUG=1 ./ireport-x11.sh`.
 - `etc/ireport.conf` — `jdkhome="jre"`, `-Xmx1024m`, suavizado de fuentes.
