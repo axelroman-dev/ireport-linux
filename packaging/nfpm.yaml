@@ -36,8 +36,7 @@ overrides:
     depends: [xpra, xorg-x11-server-Xvfb, xorg-x11-xauth]
     recommends: [xdpyinfo]
   archlinux:
-    depends: [xpra, xorg-server-xvfb, xorg-xauth]
-    optdepends: ["xorg-xdpyinfo: centrar la ventana principal"]
+    depends: [xpra, xorg-server-xvfb, xorg-xauth, xorg-xdpyinfo]
 
 rpm:
   group: Development/Tools
