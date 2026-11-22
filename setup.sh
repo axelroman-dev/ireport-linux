@@ -26,5 +26,7 @@ jre/bin/java -version
 for cmd in xpra Xvfb xauth; do
     command -v "$cmd" >/dev/null || MISSING=1
 done
-[ -n "${MISSING:-}" ] && echo "Falta instalar: sudo dnf install xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo"
+. "$APPDIR/lib/distro.sh"
+echo "Sistema detectado: $DISTRO_FAMILY"
+[ -n "${MISSING:-}" ] && echo "Falta instalar: $DEPS_INSTALL"
 echo "Listo. Ejecuta: $APPDIR/ireport-x11.sh"

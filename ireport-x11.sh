@@ -1,7 +1,7 @@
 #!/bin/bash
 # Ejecuta iReport en su propio servidor X11 aislado mediante Xpra (modo seamless):
 # cada ventana de iReport aparece como una ventana normal del escritorio Wayland.
-# Requiere (Fedora): xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo
+# Requiere: xpra, Xvfb, xauth (y xdpyinfo para centrar la ventana); ver lib/distro.sh
 # IREPORT_DEBUG=1 muestra el log de Xpra en la terminal.
 
 APPDIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
@@ -16,8 +16,15 @@ USERDIR="$HOME/.ireport/5.6.0"
 WIN_W=1920
 WIN_H=1080
 
+. "$APPDIR/lib/distro.sh"
 for cmd in xpra Xvfb xauth; do
-    command -v "$cmd" >/dev/null || { echo "Falta '$cmd': sudo dnf install xpra xorg-x11-server-Xvfb xorg-x11-xauth xdpyinfo" >&2; exit 1; }
+    if ! command -v "$cmd" >/dev/null; then
+        MSG="Falta '$cmd'. Instálalo con: $DEPS_INSTALL"
+        echo "$MSG" >&2
+        # Lanzado desde el menú (sin terminal): avisar con una notificación
+        [ -t 2 ] || notify-send -a iReport "iReport no puede arrancar" "$MSG" 2>/dev/null
+        exit 1
+    fi
 done
 
 # Tamaño inicial de la ventana principal: 1920x1080 centrada
@@ -44,6 +51,11 @@ LOG="$USERDIR/var/log/xpra.log"
 mkdir -p "$(dirname "$LOG")"
 [ -z "$IREPORT_DEBUG" ] && exec >"$LOG" 2>&1
 
+# --splash solo existe desde Xpra 4 (Debian 12 y Ubuntu 24.04 traen la 3.1)
+XPRA_EXTRA=()
+XPRA_MAJOR="$(xpra --version 2>/dev/null | sed -n 's/^xpra v\([0-9]*\).*/\1/p' | head -1)"
+[ "${XPRA_MAJOR:-0}" -ge 4 ] && XPRA_EXTRA+=(--splash=no)
+
 exec xpra start ":$D" \
     --start-child="$(printf '%q ' "$APPDIR/ireport-x11.sh" --child "$@")" \
     --xvfb="Xvfb +extension Composite +extension RANDR +extension RENDER -screen 0 5120x2880x24+32 -nolisten tcp -noreset -dpi 96" \
@@ -51,7 +63,6 @@ exec xpra start ":$D" \
     --ssh-upgrade=no \
     --attach=yes \
     --daemon=no \
-    --splash=no \
     --tray=no \
     --notifications=no \
     --mdns=no \
@@ -60,4 +71,5 @@ exec xpra start ":$D" \
     --speaker=no \
     --microphone=no \
     --printing=no \
-    --systemd-run=no
+    --systemd-run=no \
+    "${XPRA_EXTRA[@]}"
