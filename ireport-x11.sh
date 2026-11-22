@@ -47,6 +47,14 @@ XPRA_EXTRA=()
 XPRA_MAJOR="$(xpra --version 2>/dev/null | sed -n 's/^xpra v\([0-9]*\).*/\1/p' | head -1)"
 [ "${XPRA_MAJOR:-0}" -ge 4 ] && XPRA_EXTRA+=(--splash=no --headerbar=no)
 
+# Cliente de Xpra con app_id "ireport" para que el escritorio muestre el icono de
+# ireport.desktop (ver lib/xpra-ireport.py). Usa el mismo Python que /usr/bin/xpra.
+XPRA_PY="$(sed -n '1s/^#! *\(.*python[^ ]*.*\)$/\1/p' "$(command -v xpra)" 2>/dev/null)"
+if [ -n "$XPRA_PY" ] && $XPRA_PY -c 'from xpra.platform import set_name' 2>/dev/null; then
+    read -ra XPRA_PY_ARR <<< "$XPRA_PY"
+    export XPRA_COMMAND="$(printf '%q ' "${XPRA_PY_ARR[@]}" "$APPDIR/lib/xpra-ireport.py")"
+fi
+
 exec xpra start ":$D" \
     --start-child="$(printf '%q ' "$APPDIR/ireport-x11.sh" --child "$@")" \
     --xvfb="Xvfb +extension Composite +extension RANDR +extension RENDER -screen 0 5120x2880x24+32 -nolisten tcp -noreset -dpi 96" \
