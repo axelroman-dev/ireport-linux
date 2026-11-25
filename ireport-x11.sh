@@ -55,6 +55,33 @@ if [ -n "$XPRA_PY" ] && $XPRA_PY -c 'from xpra.platform import set_name' 2>/dev/
     export XPRA_COMMAND="$(printf '%q ' "${XPRA_PY_ARR[@]}" "$APPDIR/lib/xpra-ireport.py")"
 fi
 
+# ¿Quedó un iReport de una sesión anterior? Retiene el lock de $USERDIR, así que uno
+# nuevo solo le pasaría los argumentos y se cerraría al instante (y Xpra con él).
+#  - Si su servidor Xpra sigue vivo (p.ej. se cerró solo el cliente): reconectarse.
+#  - Si el servidor murió (crash de Xpra): sus ventanas ya no se pueden mostrar;
+#    terminar los huérfanos (iReport, Xvfb, ibus) para poder arrancar de nuevo.
+OLD_PID="$(pgrep -u "$(id -u)" -f "org\.netbeans\.Main --userdir $USERDIR( |\$)" | head -1)"
+if [ -n "$OLD_PID" ]; then
+    OLD_D="$(tr '\0' '\n' < "/proc/$OLD_PID/environ" 2>/dev/null | sed -n 's/^DISPLAY=:\([0-9]*\).*/\1/p')"
+    if [ -n "$OLD_D" ] && timeout 10 xpra info ":$OLD_D" >/dev/null 2>&1; then
+        read -ra XPRA_CLIENT <<< "${XPRA_COMMAND:-xpra}"
+        exec "${XPRA_CLIENT[@]}" attach ":$OLD_D" --title=@title@ --tray=no --notifications=no \
+            --speaker=no --microphone=no --webcam=no --printing=no "${XPRA_EXTRA[@]}"
+    fi
+    MSG="La sesión anterior de iReport quedó colgada (se cerró Xpra); se reinicia iReport."
+    echo "$MSG" >&2
+    [ -t 2 ] || notify-send -a iReport "iReport" "$MSG" 2>/dev/null
+    kill "$OLD_PID" 2>/dev/null
+    if [ -n "$OLD_D" ]; then
+        pkill -u "$(id -u)" -f "^Xvfb-for-Xpra-$OLD_D " 2>/dev/null
+        pkill -u "$(id -u)" -f "^Xvfb .* :$OLD_D\$" 2>/dev/null
+        pkill -u "$(id -u)" -f "xpra/$OLD_D/ibus-daemon\.pid" 2>/dev/null
+    fi
+    for _ in 1 2 3 4 5 6 7 8 9 10; do kill -0 "$OLD_PID" 2>/dev/null || break; sleep 0.5; done
+    kill -9 "$OLD_PID" 2>/dev/null
+    xpra clean-sockets >/dev/null 2>&1
+fi
+
 exec xpra start ":$D" \
     --start-child="$(printf '%q ' "$APPDIR/ireport-x11.sh" --child "$@")" \
     --xvfb="Xvfb +extension Composite +extension RANDR +extension RENDER -screen 0 5120x2880x24+32 -nolisten tcp -noreset -dpi 96" \

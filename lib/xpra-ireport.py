@@ -1,3 +1,4 @@
+#!/usr/bin/python3 -sP
 # Igual que /usr/bin/xpra, pero con el nombre de programa "ireport".
 #
 # En Wayland el cliente GTK de Xpra usa su nombre de programa (prgname) como app_id
